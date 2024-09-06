@@ -13,6 +13,7 @@ import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -121,5 +122,29 @@ public class EmployeeController {
         employeeService.startOrStop(status, id);
         return Result.success();
     }
+
+    @ApiOperation("根据id查询员工信息")
+    @GetMapping("/{id}")
+    //查询方法注意Result的泛型
+    public Result<Employee> getById(@PathVariable Long id) {
+        log.info("查询id为{}的员工信息作回显使用", id);
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
+    }
+
+    /**
+     * 根据id更新员工信息
+     * @param employeeDTO
+     * @return
+     */
+    @ApiOperation("根据id更新员工信息")
+    @PutMapping
+    public Result updateById(@RequestBody EmployeeDTO employeeDTO){
+        log.info("更新id为{}的员工的信息", employeeDTO.getId());
+        employeeService.updateById(employeeDTO);
+        return Result.success();
+    }
+
+
 
 }
