@@ -86,7 +86,7 @@ public class EmployeeController {
      */
     @PostMapping
     @ApiOperation("新增员工")//
-    public Result save(@RequestBody EmployeeDTO employeeDTO) {
+    public Result<String> save(@RequestBody EmployeeDTO employeeDTO) {
 //        System.out.println("当前线程ID: "+Thread.currentThread().getName());
         log.info("新增员工:{}", employeeDTO);
         //调用Service层
@@ -117,7 +117,7 @@ public class EmployeeController {
      */
     @ApiOperation("启用或禁用员工账号")
     @PostMapping("/status/{status}")
-    public Result startOrStop(@PathVariable Integer status, Long id) {
+    public Result<String> startOrStop(@PathVariable Integer status, Long id) {
         log.info("启用或禁用id为{}的员工的账号", id);
         employeeService.startOrStop(status, id);
         return Result.success();
@@ -139,7 +139,7 @@ public class EmployeeController {
      */
     @ApiOperation("根据id更新员工信息")
     @PutMapping
-    public Result updateById(@RequestBody EmployeeDTO employeeDTO){
+    public Result<String> updateById(@RequestBody EmployeeDTO employeeDTO){
         log.info("更新id为{}的员工的信息", employeeDTO.getId());
         employeeService.updateById(employeeDTO);
         return Result.success();
