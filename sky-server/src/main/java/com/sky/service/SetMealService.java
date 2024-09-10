@@ -1,5 +1,6 @@
 package com.sky.service;
 
+import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.result.PageResult;
 import org.springframework.stereotype.Service;
@@ -13,4 +14,10 @@ public interface SetMealService {
      * @return
      */
     PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    /**
+     * 新增套餐
+     * @param setmealDTO
+     */
+    void save(SetmealDTO setmealDTO);
 }
