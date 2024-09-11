@@ -3,12 +3,17 @@ package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.annotation.AutoFill;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
 import com.sky.enumeration.OperationType;
+import com.sky.exception.SetmealEnableFailedException;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetMealDishMapper;
 import com.sky.mapper.SetMealMapper;
 import com.sky.result.PageResult;
@@ -26,12 +31,12 @@ import java.util.List;
 @Service
 @Slf4j
 public class SetMealServiceImpl implements SetMealService {
-
     @Autowired
     private SetMealMapper setmealMapper;
-
     @Autowired
     private SetMealDishMapper setMealDishMapper;
+    @Autowired
+    private DishMapper dishMapper;
 
     @Override
     public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
@@ -91,7 +96,21 @@ public class SetMealServiceImpl implements SetMealService {
 
     @Override
     public void changeStatus(Long id, Integer status) {
-//        Setmeal setmeal = new Setmeal();
+        //起售套餐时，判断套餐内是否有停售菜品，有停售菜品提示"套餐内包含未启售菜品，无法启售"
+        if(status == StatusConstant.ENABLE){
+            //欲启售
+            List<SetmealDish> setmealDishes = setMealDishMapper.getBySetMealId(id);
+            if (setmealDishes != null && setmealDishes.size() > 0) {
+                for (SetmealDish setmealDish : setmealDishes) {
+                    Dish dish = dishMapper.getById(setmealDish.getDishId());
+                    if(dish.getStatus() == StatusConstant.DISABLE){
+                        //有停售菜品
+                        throw new SetmealEnableFailedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                    }
+                }
+            }
+        }
+
         Setmeal setmeal = Setmeal.builder().status(status).id(id).build();
         setmealMapper.changeStatus(setmeal);
     }

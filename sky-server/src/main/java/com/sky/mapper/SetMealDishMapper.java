@@ -12,7 +12,7 @@ public interface SetMealDishMapper {
      * 根据菜品id查询对应的套餐id
      * @return
      */
-    public List<Long> getSetMealIdsByDishIds(List<Long> dishIds);
+    List<Long> getSetMealIdsByDishIds(List<Long> dishIds);
 
     /**
      * 新增套餐绑定的菜品
@@ -28,7 +28,7 @@ public interface SetMealDishMapper {
 
     /**
      * 根据套餐id查询对应菜品
-     * @param id
+     * @param setMealId
      * @return
      */
     List<SetmealDish> getBySetMealId(Long setMealId);

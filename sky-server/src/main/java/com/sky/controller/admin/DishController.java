@@ -9,6 +9,7 @@ import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -100,6 +101,18 @@ public class DishController {
     public Result<List<Dish>> getByCategoryId(Long categoryId){
         List<Dish> listDish= dishService.getByCategoryId(categoryId);
         return Result.success(listDish);
+    }
+
+    /**
+     * 启售或停售菜品
+     * @return
+     */
+    @ApiOperation("启售或停售菜品")
+    @PostMapping("/status/{status}")
+    public Result<String> updateStatus(@PathVariable Integer status, Long id){
+        log.info("启售或停售菜品");
+        dishService.updateStatus(status, id);
+        return Result.success();
     }
 
 }
