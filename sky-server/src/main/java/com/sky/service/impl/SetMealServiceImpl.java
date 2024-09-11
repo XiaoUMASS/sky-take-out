@@ -50,4 +50,12 @@ public class SetMealServiceImpl implements SetMealService {
         setmealDishes.forEach(setmealDish -> setmealDish.setSetmealId(setmealId));
         setMealDishMapper.insert(setmealDishes);
     }
+
+    @Override
+    public void deleteByIds(List<Long> ids) {
+        //删除套餐的菜品组成
+        setMealDishMapper.deleteByIds(ids);
+        //删除套餐
+        setmealMapper.deleteByIds(ids);
+    }
 }

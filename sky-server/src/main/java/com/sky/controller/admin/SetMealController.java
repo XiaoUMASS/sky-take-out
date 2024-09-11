@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "套餐相关")
 @RestController
 @Slf4j
@@ -44,5 +46,19 @@ public class SetMealController {
         setMealService.save(setmealDTO);
         return Result.success();
     }
+
+    /**
+     * 批量删除套餐
+     * @param ids
+     * @return
+     */
+    @ApiOperation("批量删除套餐")
+    @DeleteMapping
+    public Result<String> deleteByIds(@RequestParam List<Long> ids){
+        log.info("批量删除套餐：{}", ids);
+        setMealService.deleteByIds(ids);
+        return Result.success();
+    }
+
 
 }
