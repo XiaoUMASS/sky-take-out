@@ -32,4 +32,10 @@ public interface SetMealDishMapper {
      * @return
      */
     List<SetmealDish> getBySetMealId(Long setMealId);
+
+    /**
+     * 更新套餐对应菜品
+     * @param setmealDishes
+     */
+//    void update(List<SetmealDish> setmealDishes);
 }

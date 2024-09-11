@@ -18,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -70,5 +71,19 @@ public class SetMealServiceImpl implements SetMealService {
         List<SetmealDish> setmealDishes = setMealDishMapper.getBySetMealId(id);
         setmealVO.setSetmealDishes(setmealDishes);
         return setmealVO;
+    }
+
+    @Override
+    public void update(SetmealDTO setmealDTO) {
+        //更新setmeal表
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+        setmealMapper.update(setmeal);
+        //更新setmeal_dish表
+//        setMealDishMapper.update(setmealDTO.getSetmealDishes());
+        setMealDishMapper.deleteByIds(Arrays.asList(setmealDTO.getId()));
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        setmealDishes.forEach(dish -> dish.setSetmealId(setmealDTO.getId()));
+        setMealDishMapper.insert(setmealDishes);
     }
 }
