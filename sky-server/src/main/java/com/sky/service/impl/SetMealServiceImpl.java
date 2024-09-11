@@ -12,6 +12,7 @@ import com.sky.mapper.SetMealDishMapper;
 import com.sky.mapper.SetMealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetMealService;
+import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,5 +58,17 @@ public class SetMealServiceImpl implements SetMealService {
         setMealDishMapper.deleteByIds(ids);
         //删除套餐
         setmealMapper.deleteByIds(ids);
+    }
+
+    @Override
+    public SetmealVO getById(Long id) {
+        //从setmeal表中获取
+        Setmeal setmeal = setmealMapper.getById(id);
+        SetmealVO setmealVO = new SetmealVO();
+        BeanUtils.copyProperties(setmeal, setmealVO);
+        //从setmeal_dish表中获取
+        List<SetmealDish> setmealDishes = setMealDishMapper.getBySetMealId(id);
+        setmealVO.setSetmealDishes(setmealDishes);
+        return setmealVO;
     }
 }

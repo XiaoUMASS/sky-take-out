@@ -42,4 +42,10 @@ public interface SetMealMapper {
      * @param ids
      */
     void deleteByIds(List<Long> ids);
+
+    /**
+     * 根据id查询套餐
+     * @return
+     */
+    Setmeal getById(Long id);
 }
