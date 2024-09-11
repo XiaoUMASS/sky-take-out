@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -55,4 +56,11 @@ public interface SetMealMapper {
      */
     @AutoFill(OperationType.UPDATE)
     void update(Setmeal setmeal);
+
+    /**
+     * 停售或启售套餐
+     * @param setmeal
+     */
+    @AutoFill(OperationType.UPDATE)
+    void changeStatus(Setmeal setmeal);
 }

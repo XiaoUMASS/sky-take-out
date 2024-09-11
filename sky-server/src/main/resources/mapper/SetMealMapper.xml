@@ -38,6 +38,21 @@
         </set>
         where id = #{id}
     </update>
+    <update id="changeStatus">
+        update setmeal
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
     <delete id="deleteByIds">
         delete
         from setmeal

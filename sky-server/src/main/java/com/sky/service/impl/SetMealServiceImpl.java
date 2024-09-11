@@ -3,6 +3,7 @@ package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.annotation.AutoFill;
+import com.sky.context.BaseContext;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
@@ -18,6 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,14 +37,14 @@ public class SetMealServiceImpl implements SetMealService {
     public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
         PageHelper.startPage(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
         Page<Setmeal> page = setmealMapper.pageQuery(setmealPageQueryDTO);
-        return new PageResult(page.getTotal(),page.getResult());
+        return new PageResult(page.getTotal(), page.getResult());
     }
 
     @Override
     @AutoFill(OperationType.INSERT)
     public void save(SetmealDTO setmealDTO) {
         Setmeal setmeal = new Setmeal();
-        BeanUtils.copyProperties(setmealDTO,setmeal);
+        BeanUtils.copyProperties(setmealDTO, setmeal);
         //将套餐信息录入，同时获得主键ID
         setmealMapper.insert(setmeal);
         //拿到上面已经插入的setmeal的主键id
@@ -85,5 +87,12 @@ public class SetMealServiceImpl implements SetMealService {
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
         setmealDishes.forEach(dish -> dish.setSetmealId(setmealDTO.getId()));
         setMealDishMapper.insert(setmealDishes);
+    }
+
+    @Override
+    public void changeStatus(Long id, Integer status) {
+//        Setmeal setmeal = new Setmeal();
+        Setmeal setmeal = Setmeal.builder().status(status).id(id).build();
+        setmealMapper.changeStatus(setmeal);
     }
 }
