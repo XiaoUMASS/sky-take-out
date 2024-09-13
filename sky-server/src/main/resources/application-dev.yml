@@ -15,3 +15,8 @@ sky:
     bucket-name: sky-itcast-20240908
     access-key-id: LTAI5t9Tykiy43uqKAbUs6Dm
     access-key-secret: sV8M8kz3KKZX0kN78gzWemFKUF4my9
+  redis:
+    host: localhost
+    port: 6379
+    password: Newrun1019
+    database: 0
