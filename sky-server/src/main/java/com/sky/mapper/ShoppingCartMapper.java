@@ -30,5 +30,5 @@ public interface ShoppingCartMapper {
     /**
      * 清空购物车
      */
-    void deleteByUserId(Long currentId);
+    void delete(ShoppingCart shoppingCart);
 }

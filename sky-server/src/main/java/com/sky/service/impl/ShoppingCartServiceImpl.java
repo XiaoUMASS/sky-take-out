@@ -1,10 +1,12 @@
 package com.sky.service.impl;
 
+import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.ShoppingCart;
+import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetMealMapper;
 import com.sky.mapper.ShoppingCartMapper;
@@ -79,6 +81,32 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public void cleanShoppingCart() {
         Long currentId = BaseContext.getCurrentId();
-        shoppingCartMapper.deleteByUserId(currentId);
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUserId(currentId);
+        shoppingCartMapper.delete(shoppingCart);
+    }
+
+    @Override
+    public void subtractFromShoppingCart(ShoppingCartDTO shoppingCartDTO) {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO,shoppingCart);
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+
+        List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
+        if(list != null && list.size()>0){
+            ShoppingCart cart = list.get(0);
+            if(cart.getNumber() == 1){
+                //若该商品只有一个，则从数据库中删除
+                shoppingCartMapper.delete(shoppingCart);
+            }else{
+                //若该商品有多个，则数量减一
+                cart.setNumber(list.get(0).getNumber()-1);
+                shoppingCartMapper.updateNumberById(cart);
+            }
+        }else{
+            throw new ShoppingCartBusinessException(MessageConstant.UNKNOWN_ERROR);
+        }
+
+
     }
 }
