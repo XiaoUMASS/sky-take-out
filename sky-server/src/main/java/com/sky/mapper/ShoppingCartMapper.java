@@ -28,9 +28,7 @@ public interface ShoppingCartMapper {
     void insert(ShoppingCart shoppingCart);
 
     /**
-     * 查询当前用户的购物车
-     * @param currentId
-     * @return
+     * 清空购物车
      */
-//    List<ShoppingCart> getByUserId(Long currentId);
+    void deleteByUserId(Long currentId);
 }
