@@ -23,3 +23,10 @@ sky:
   wechat:
     appid: wx31cfad812adeb7e5
     secret: 9b607be24143ed72d9245f9bc7e15d62
+#    #商户号
+#    mchid:
+#    #商户API整数的整数序列号
+#    mch-serial-no:
+#    #商户私钥文件
+#    private-key-file-path:
+
