@@ -42,4 +42,10 @@ public interface OrderService {
      * @return
      */
     OrderVO getByOrderId(Long orderId);
+
+    /**
+     * 更新order的Status
+     * @param id
+     */
+    void cancelOrder(Long id);
 }
