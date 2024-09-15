@@ -22,6 +22,7 @@ import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,5 +175,15 @@ public class OrderServiceImpl implements OrderService {
             list.add(orderVO);
         }
         return new PageResult(page.getTotal(), list);
+    }
+
+    @Override
+    public OrderVO getByOrderId(Long orderId) {
+        OrderVO orderVO = new OrderVO();
+        Orders orders = orderMapper.getById(orderId);
+        BeanUtils.copyProperties(orders, orderVO);
+        List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(orders.getId());
+        orderVO.setOrderDetailList(orderDetails);
+        return orderVO;
     }
 }
