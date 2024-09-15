@@ -4,6 +4,7 @@ import com.sky.entity.OrderDetail;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Mapper
 public interface OrderDetailMapper {
@@ -12,4 +13,11 @@ public interface OrderDetailMapper {
      * @param details
      */
     void insertBatch(ArrayList<OrderDetail> details);
+
+    /**
+     * 根据OrderId查询订单详细信息
+     * @param orderId
+     * @return
+     */
+    List<OrderDetail> getByOrderId(Long orderId);
 }
