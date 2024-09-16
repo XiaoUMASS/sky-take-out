@@ -6,6 +6,7 @@ import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersConfirmDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -251,6 +252,15 @@ public class OrderServiceImpl implements OrderService {
             list.add(orderVO);
         }
         return new PageResult(page.getTotal(), list);
+    }
+
+    @Override
+    public void confirmOrder(OrdersConfirmDTO ordersConfirmDTO) {
+//        Long id = Long.valueOf(id_int);
+        Orders orders = new Orders();
+        orders.setId(ordersConfirmDTO.getId());
+        orders.setStatus(Orders.CONFIRMED);
+        orderMapper.update(orders);
     }
 
     /**
