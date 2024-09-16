@@ -9,6 +9,7 @@ import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderStatisticsVO;
+import com.sky.vo.OrderVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -84,4 +85,43 @@ public class OrderController {
         orderService.cancelOrderAdmin(ordersCancelDTO);
         return Result.success();
     }
+
+    /**
+     * 派送订单
+     * @param id
+     * @return
+     */
+    @ApiOperation("派送订单")
+    @PutMapping("/delivery/{id}")
+    public Result deliver(@PathVariable Long id){
+        log.info("派送订单:{}", id);
+        orderService.deliver(id);
+        return Result.success();
+    }
+
+    /**
+     * 完成订单
+     * @param id
+     * @return
+     */
+    @ApiOperation("完成订单")
+    @PutMapping("/complete/{id}")
+    public Result completeOrder(@PathVariable Long id){
+        log.info("完成订单:{}", id);
+        orderService.completeOrder(id);
+        return Result.success();
+    }
+
+    /**
+     * 查询订单详情
+     * @return
+     */
+    @ApiOperation("查询订单详情")
+    @GetMapping("/details/{id}")
+    public Result<OrderVO> getOrderDetails(@PathVariable Long id){
+        log.info("查询订单详情:{}",id);
+        OrderVO orderVO = orderService.getByOrderId(id);
+        return Result.success(orderVO);
+    }
+
 }

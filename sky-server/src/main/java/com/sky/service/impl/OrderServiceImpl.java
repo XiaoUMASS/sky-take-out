@@ -75,6 +75,13 @@ public class OrderServiceImpl implements OrderService {
         orders.setPhone(addressBook.getPhone());
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(currentId);
+        //写入地址
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(addressBook.getProvinceName());
+        stringBuilder.append(addressBook.getCityName());
+        stringBuilder.append(addressBook.getDistrictName());
+        stringBuilder.append(addressBook.getDetail());
+        orders.setAddress(stringBuilder.toString());
         orderMapper.insert(orders);
         //向订单明细表插入N条数据
         ArrayList<OrderDetail> details = new ArrayList<>();
@@ -277,6 +284,41 @@ public class OrderServiceImpl implements OrderService {
         orders.setCancelReason(ordersCancelDTO.getCancelReason());
         orders.setStatus(Orders.CANCELLED);
         orders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void deliver(Long id) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在，并且状态为3
+        if (ordersDB == null || !ordersDB.getStatus().equals(Orders.CONFIRMED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders orders = new Orders();
+        orders.setId(id);
+        orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void completeOrder(Long id) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在，并且状态为4
+        if (ordersDB == null || !ordersDB.getStatus().equals(Orders.DELIVERY_IN_PROGRESS)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders orders = new Orders();
+        orders.setId(ordersDB.getId());
+        // 更新订单状态,状态转为完成
+        orders.setStatus(Orders.COMPLETED);
+        orders.setDeliveryTime(LocalDateTime.now());
+
         orderMapper.update(orders);
     }
 
