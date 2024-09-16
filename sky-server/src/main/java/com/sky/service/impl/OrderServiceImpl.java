@@ -194,4 +194,26 @@ public class OrderServiceImpl implements OrderService {
         orders.setStatus(Orders.CANCELLED);
         orderMapper.update(orders);
     }
+
+    @Override
+    public void repeatOrder(Long id) {
+//        Orders orders = orderMapper.getById(id);
+//        orders.setOrderTime(LocalDateTime.now());
+//        orders.setPayStatus(Orders.UN_PAID);
+//        orders.setStatus(Orders.PENDING_PAYMENT);
+//        orders.setNumber(String.valueOf(System.currentTimeMillis()));
+//        orderMapper.insert(orders);
+        List<OrderDetail> details = orderDetailMapper.getByOrderId(id);
+        Long userId = BaseContext.getCurrentId();
+        ShoppingCart shoppingCart = new ShoppingCart();
+        for (OrderDetail detail : details) {
+            BeanUtils.copyProperties(detail, shoppingCart);
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            shoppingCartMapper.insert(shoppingCart);
+        }
+
+//        details.forEach(orderDetail -> orderDetail.setOrderId(orders.getId()));
+//        orderDetailMapper.insertBatch(details);
+    }
 }
