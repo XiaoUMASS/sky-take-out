@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
@@ -17,6 +18,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -53,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderSubmitVO submitOrder(OrdersSubmitDTO ordersSubmitDTO) {
         //处理各种业务异常（地址簿为空，购物车为空）
         AddressBook addressBook = addressBookMapper.getById(ordersSubmitDTO.getAddressBookId());
-        if(addressBook == null){
+        if (addressBook == null) {
             throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
         }
         //查询当前用户的购物车数据
@@ -61,12 +64,12 @@ public class OrderServiceImpl implements OrderService {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUserId(currentId);
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
-        if(shoppingCartList == null || shoppingCartList.size() == 0){
+        if (shoppingCartList == null || shoppingCartList.size() == 0) {
             throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
         }
         //向订单表插入一条数据
         Orders orders = new Orders();
-        BeanUtils.copyProperties(ordersSubmitDTO,orders);
+        BeanUtils.copyProperties(ordersSubmitDTO, orders);
         orders.setOrderTime(LocalDateTime.now());
         orders.setPayStatus(Orders.UN_PAID);
         orders.setStatus(Orders.PENDING_PAYMENT);
@@ -79,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
         ArrayList<OrderDetail> details = new ArrayList<>();
         for (ShoppingCart cart : shoppingCartList) {
             OrderDetail orderDetail = new OrderDetail();
-            BeanUtils.copyProperties(cart,orderDetail);
+            BeanUtils.copyProperties(cart, orderDetail);
             orderDetail.setOrderId(orders.getId());//设置当前订单明细关联的订单ID
             details.add(orderDetail);
         }
@@ -98,6 +101,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         return vo;
     }
+
     /**
      * 订单支付
      *
@@ -150,6 +154,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 查询历史订单
+     *
      * @param ordersPageQueryDTO
      * @return
      */
@@ -157,12 +162,11 @@ public class OrderServiceImpl implements OrderService {
     public PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
 //        PageHelper pageHelper = new PageHelper();
         Page page = PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
-        Orders orders = new Orders();
-        if(ordersPageQueryDTO.getStatus() != null){
-            orders.setStatus(ordersPageQueryDTO.getStatus());
-        }
-        orders.setUserId(BaseContext.getCurrentId());
-        Page<Orders> pageQuery = orderMapper.pageQuery(orders);
+//        Orders orders = new Orders();
+//        BeanUtils.copyProperties(ordersPageQueryDTO, orders);
+//        orders.setUserId(BaseContext.getCurrentId());
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        Page<Orders> pageQuery = orderMapper.pageQuery(ordersPageQueryDTO);
         List<Orders> results = pageQuery.getResult();
         ArrayList<OrderVO> list = new ArrayList<>();
         for (Orders result : results) {
@@ -170,8 +174,9 @@ public class OrderServiceImpl implements OrderService {
             //查询result对应的OrderDetail
             List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(result.getId());
             OrderVO orderVO = new OrderVO();
-            BeanUtils.copyProperties(result,orderVO);
+            BeanUtils.copyProperties(result, orderVO);
             orderVO.setOrderDetailList(orderDetails);
+//            orderVO.setOrderDishes(getOrderDishesStr(result));
             list.add(orderVO);
         }
         return new PageResult(page.getTotal(), list);
@@ -215,5 +220,56 @@ public class OrderServiceImpl implements OrderService {
 
 //        details.forEach(orderDetail -> orderDetail.setOrderId(orders.getId()));
 //        orderDetailMapper.insertBatch(details);
+    }
+
+    @Override
+    public OrderStatisticsVO getStatistics() {
+        //count * from
+        Integer confirmed = orderMapper.countByStatus(Orders.CONFIRMED);
+        Integer deliveryInProgress = orderMapper.countByStatus(Orders.DELIVERY_IN_PROGRESS);
+        Integer toBeConfirmed = orderMapper.countByStatus(Orders.TO_BE_CONFIRMED);
+        //封装为OrderStatisticsVO
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        orderStatisticsVO.setConfirmed(confirmed);
+        orderStatisticsVO.setDeliveryInProgress(deliveryInProgress);
+        orderStatisticsVO.setToBeConfirmed(toBeConfirmed);
+        return orderStatisticsVO;
+    }
+
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        Page page = PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<Orders> pageQuery = orderMapper.pageQuery(ordersPageQueryDTO);
+        List<Orders> orders = pageQuery.getResult();
+        ArrayList<OrderVO> list = new ArrayList<>();
+        for (Orders order : orders) {
+            //把Orders类的result封装进OrderVO中
+            //查询result对应的OrderDetail
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(order, orderVO);
+            orderVO.setOrderDishes(getOrderDishesStr(order));
+            list.add(orderVO);
+        }
+        return new PageResult(page.getTotal(), list);
+    }
+
+    /**
+     * 根据订单id获取菜品信息字符串
+     *
+     * @param orders
+     * @return
+     */
+    private String getOrderDishesStr(Orders orders) {
+        // 查询订单菜品详情信息（订单中的菜品和数量）
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+
+        // 将每一条订单菜品信息拼接为字符串（格式：宫保鸡丁*3；）
+        List<String> orderDishList = orderDetailList.stream().map(x -> {
+            String orderDish = x.getName() + "*" + x.getNumber() + ";";
+            return orderDish;
+        }).collect(Collectors.toList());
+
+        // 将该订单对应的所有菜品信息拼接在一起
+        return String.join("", orderDishList);
     }
 }
